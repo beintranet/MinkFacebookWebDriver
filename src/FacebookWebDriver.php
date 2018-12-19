@@ -971,7 +971,35 @@ JS;
     {
         $source = $this->findElement($sourceXpath);
         $destination = $this->findElement($destinationXpath);
-        $this->webDriver->action()->dragAndDrop($source, $destination);
+
+        $source->getLocationOnScreenOnceScrolledIntoView();
+        $this->webDriver->getMouse()->mouseMove($source->getCoordinates());
+
+        $script = <<<JS
+(function (element) {
+    var event = document.createEvent("HTMLEvents");
+    event.initEvent("dragstart", true, true);
+    event.dataTransfer = {};
+    element.dispatchEvent(event);
+}({{ELEMENT}}));
+JS;
+        $this->withSyn()->executeJsOnElement($source, $script);
+
+        $this->webDriver->getMouse()->mouseDown($source->getCoordinates());
+
+        $destination->getLocationOnScreenOnceScrolledIntoView();
+        $this->webDriver->getMouse()->mouseMove($destination->getCoordinates());
+        $this->webDriver->getMouse()->mouseUp($destination->getCoordinates());
+
+        $script = <<<JS
+(function (element) {
+    var event = document.createEvent("HTMLEvents");
+    event.initEvent("drop", true, true);
+    event.dataTransfer = {};
+    element.dispatchEvent(event);
+}({{ELEMENT}}));
+JS;
+        $this->withSyn()->executeJsOnElement($destination, $script);
     }
 
     /**
