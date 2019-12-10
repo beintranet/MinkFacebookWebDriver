@@ -970,10 +970,6 @@ JS;
     public function dragTo($sourceXpath, $destinationXpath)
     {
         $source = $this->findElement($sourceXpath);
-        $destination = $this->findElement($destinationXpath);
-
-        $source->getLocationOnScreenOnceScrolledIntoView();
-        $this->webDriver->getMouse()->mouseMove($source->getCoordinates());
 
         $script = <<<JS
 (function (element) {
@@ -984,13 +980,8 @@ JS;
 }({{ELEMENT}}));
 JS;
         $this->withSyn()->executeJsOnElement($source, $script);
-
-        $this->webDriver->getMouse()->mouseDown($source->getCoordinates());
-
-        $destination->getLocationOnScreenOnceScrolledIntoView();
-        $this->webDriver->getMouse()->mouseMove($destination->getCoordinates());
-        $this->webDriver->getMouse()->mouseUp($destination->getCoordinates());
-
+        $destination = $this->findElement($destinationXpath);
+        
         $script = <<<JS
 (function (element) {
     var event = document.createEvent("HTMLEvents");
@@ -999,7 +990,7 @@ JS;
     element.dispatchEvent(event);
 }({{ELEMENT}}));
 JS;
-        $this->withSyn()->executeJsOnElement($destination, $script);
+         $this->withSyn()->executeJsOnElement($destination, $script);
     }
 
     /**
